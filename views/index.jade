@@ -2,7 +2,8 @@ extends layout
 
 block content
   img(src="images/somelogo.png")
-  p Welcome to #{title}
+  p Wikipedia readability measure that can accurately determine if an article is well written.
   form(id="wiki_link", action="/", method="post")
-   input(type="text", name="input link", id="link")
+   | Wikipedia Link: 
+   input(type="text", name="link", id="link")
    input(type="submit", id="link_submit")
