@@ -1,6 +1,8 @@
 extends layout
 
 block content
-  h1= title
+  img(src="images/somelogo.png")
   p Welcome to #{title}
-  input
+  form(id="wiki_link", action="/", method="post")
+   input(type="text", name="input link", id="link")
+   input(type="submit", id="link_submit")
