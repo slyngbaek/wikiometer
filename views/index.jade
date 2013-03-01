@@ -1,9 +1,15 @@
 extends layout
 
 block content
-  img(src="images/somelogo.png")
-  p Wikipedia readability measure that can accurately determine if an article is well written.
-  form(id="wiki_link", action="/", method="post")
-   | Wikipedia Link: 
-   input(type="text", name="link", id="link")
-   input(type="submit", id="link_submit")
+  br
+  .container
+    .hero-unit
+      h1 Wikiometer
+      p.lead Wikipedia readability measure that can accurately determine if an article is well written.
+      br
+      br
+      form(id="wiki_link", action="/", method="post").form-inline
+        .input-prepend.input-append
+          span.add-on http://en.wikipedia.org/wiki/
+          input(type="text", id="link", placeholder="Michael_jordan").input-xxlarge
+          button(type="button").btn.btn-success Submit
