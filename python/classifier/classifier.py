@@ -1,13 +1,25 @@
 import nltk
 from itertools import izip
+import pickle
 import math
-#from nltk.classify.maxent import TypedMaxentFeatureEncoding
+from nltk.classify.maxent import TypedMaxentFeatureEncoding
 
 ###CLASSIFIER###
 def train():
-    processed = process_data()
-    #encoding = TypedMaxentFeatureEncoding.train(processed['featuresets'], count_cutoff=3, alwayson_features=True)
-    return nltk.MaxentClassifier.train(processed['featuresets'])
+    try:
+        classif = pickle.load(open("./classifier.pickle", "r"))    
+    except IOError:
+        print "Could not load file."
+        processed = process_data()
+        
+        encoding = TypedMaxentFeatureEncoding.train\
+            (processed['featuresets'], count_cutoff=3, alwayson_features=True)
+        classif = nltk.MaxentClassifier.train\
+            (processed['featuresets'], encoding=encoding)
+            
+        pickle.dump(classif, open("./classifier.pickle","wb"))
+    return classif
+
 
 def classify():
     processed = process_data()
@@ -46,14 +58,19 @@ def rmse_class():
 
 
 ###TRAINING DATA###
+
+#should return a list of tuples containing ("label", "query result")
+def parse_training_dir():
+    return [("5", "f{}f{fe}"), ("3", "w{}w{w}"), ("3", "w{erttttw{w}"), ("2", "w{{w}")]
+
 def load_training_data():
     l = []
-    data = ["3 f{}f{f}", "4 w{}w{w}"]#process training data here
-    for entry in data:
-        rating, text = int(entry.split()[0]), entry.split()[1]
+    data = parse_training_dir()
+    for rating, text in data:
         l.append((text, rating))
     return l
 
+#Loads series of query results to train on and associated feature sets
 def process_data():
     para_list = load_training_data()
     featuresets = paragraph_featuresets(para_list)
@@ -68,7 +85,7 @@ def process_data():
 ###FEATURES###
 def paragraph_features(xml):
     features = {}
-    '''
+    '''Example from restaurant project
     words = nltk.word_tokenize(para)
     pos_list = nltk.pos_tag(words)
 
@@ -88,14 +105,17 @@ def paragraph_features(xml):
     features['neg verb'] = neg_verb
     features['pos_count'] = pos_count'''
     features['test'] = 1
+    features['xml'] = len(xml)
+    features['vast'] = xml.count("{")
     return features
 
 #para list ("text text text", rating)
 def paragraph_featuresets(para_list):
-    return [(paragraph_features(w), s) for (w, s) in para_list]
+    return [(paragraph_features(w), int(s)) for (w, s) in para_list]
 
 
 
 classifier = train()
 print classify()
 print rmse_class()
+classifier.show_most_informative_features(10)
