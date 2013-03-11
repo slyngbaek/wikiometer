@@ -1,8 +1,15 @@
 import nltk
 from itertools import izip
-import pickle
+import cPickle as pickle
 import math
+import string as st
 from nltk.classify.maxent import TypedMaxentFeatureEncoding
+from nltk.corpus import cmudict
+
+
+d = cmudict.dict()
+punctuation = ".,?!\"\':;"
+stopwords = nltk.corpus.stopwords.words("english")
 
 ###CLASSIFIER###
 def train():
@@ -83,30 +90,43 @@ def process_data():
     
 
 ###FEATURES###
+def extract_text(xml):
+    return "test"
+    
+def num_syllables(tokens):
+    syll = 0
+    for word in tokens:
+        strip_word = word.lower().strip(punctuation)
+        if strip_word.isalpha():
+            try:
+                syll += [len(list(y for y in x if (y[-1] in st.digits))) \
+                                for x in d[word.lower()]][0]
+            except KeyError:
+                syll += 1
+        else:
+            syll += 0
+    return syll
+    
+def is_common(word):
+    if word in stopwords:
+        return True
+    else:
+        return False
+
+
 def paragraph_features(xml):
     features = {}
-    '''Example from restaurant project
-    words = nltk.word_tokenize(para)
-    pos_list = nltk.pos_tag(words)
-
-    sent_sum, char_len, neg_verb, pos_count = 0, 0, 0, 0
-    for (word, tag) in pos_list:
-        char_len += len(word)
-        if 'VBD' in tag or 'VBN' in tag:
-            neg_verb += 1
-        if 'POS' in tag:
-            pos_count += 1
-        if '!' in word:
-            features['contains(!)'] = 1
-        if 'JJ' in tag or 'VB' in tag:
-            features['contains(%s)' % word] = 1
-
-    #features['avg word length'] = char_len/len(pos_list)
-    features['neg verb'] = neg_verb
-    features['pos_count'] = pos_count'''
-    features['test'] = 1
-    features['xml'] = len(xml)
-    features['vast'] = xml.count("{")
+    text = extract_text(xml)
+    word_tokens = nltk.word_tokenize(text)
+    sent_tokens = nltk.sent_tokenize(text)
+    features["ave syllables per word"] = \
+                            num_syllables(word_tokens)/len(word_tokens)
+    features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
+    features["ave word length"] = len(word_tokens)/sum([len(word) \
+                            for word in word_tokens])
+    features["\% common words"] = len([1 for word in word_tokens\
+                            if is_common(word)])/len(word_tokens)
+    
     return features
 
 #para list ("text text text", rating)
