@@ -29,7 +29,6 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 app.post('/', function(request, response) {
 
   var wiki_link = request.body.link;
