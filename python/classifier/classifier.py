@@ -68,7 +68,7 @@ def rmse_class():
 
 #should return a list of tuples containing ("label", "query result")
 def parse_training_dir():
-    return [("5", "f{}f{fe}"), ("3", "w{}w{w}"), ("3", "w{erttttw{w}"), ("2", "w{{w}")]
+    return [("5", "I live in a bank."), ("3", "This is a test string to show how to do things."), ("4", "This strong is also somewhat difficult to read."), ("2", "Why, writing this way, would one consider formal linguistics as a guide?")]
 
 def load_training_data():
     l = []
@@ -112,27 +112,32 @@ def is_common(word):
         return True
     else:
         return False
+        
+def common_count(tokens):
+    return len([1 for word in tokens if is_common(word)])
+    
+    
+def character_count(word_tokens):
+    return sum([len(word) for word in word_tokens])
 
 
 def paragraph_features(xml):
     features = {}
-    text = extract_text(xml)
+    #text = extract_text(xml)
+    text = xml
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
-    features["ave syllables per word"] = \
-                            num_syllables(word_tokens)/len(word_tokens)
+    print sent_tokens
+    features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
-    features["ave word length"] = len(word_tokens)/sum([len(word) \
-                            for word in word_tokens])
-    features["\% common words"] = len([1 for word in word_tokens\
-                            if is_common(word)])/len(word_tokens)
-    
+    features["ave word length"] = character_count(word_tokens)/len(word_tokens)
+    features["\% common words"] = common_count(word_tokens)
+
     return features
 
 #para list ("text text text", rating)
 def paragraph_featuresets(para_list):
     return [(paragraph_features(w), int(s)) for (w, s) in para_list]
-
 
 
 classifier = train()
