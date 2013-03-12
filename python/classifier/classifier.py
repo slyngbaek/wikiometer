@@ -90,8 +90,8 @@ def process_data():
     
 
 ###FEATURES###
-def extract_text(xml):
-    return "test"
+def extract_text(xml):#STUB
+    return xml
     
 def num_syllables(tokens):
     syll = 0
@@ -123,11 +123,12 @@ def character_count(word_tokens):
 
 def paragraph_features(xml):
     features = {}
-    #text = extract_text(xml)
-    text = xml
+    
+    text = extract_text(xml)
+    
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
-    print sent_tokens
+    
     features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
     features["ave word length"] = character_count(word_tokens)/len(word_tokens)
