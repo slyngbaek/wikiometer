@@ -11,12 +11,20 @@ d = cmudict.dict()
 punctuation = ".,?!\"\':;"
 stopwords = nltk.corpus.stopwords.words("english")
 
+def create_common_list():
+    common_file = open("./common-english-words.txt", "r")
+    common_list = common_file.read().split(",")
+    common_file.close()
+    return common_list
+
+commonwords = create_common_list()
+
 ###CLASSIFIER###
 def train():
     try:
         classif = pickle.load(open("./classifier.pickle", "r"))    
     except IOError:
-        print "Could not load file."
+        #Could not load file
         processed = process_data()
         
         encoding = TypedMaxentFeatureEncoding.train\
@@ -34,7 +42,6 @@ def classify():
     test_fs, test_ratings = zip(*processed['featuresets'])
     
     return classifier.batch_classify(test_fs)
-    
     
     
     
@@ -67,7 +74,7 @@ def rmse_class():
 ###TRAINING DATA###
 
 #should return a list of tuples containing ("label", "query result")
-def parse_training_dir():
+def parse_training_dir():#STUB
     return [("5", "I live in a bank."), ("3", "This is a test string to show how to do things."), ("4", "This strong is also somewhat difficult to read."), ("2", "Why, writing this way, would one consider formal linguistics as a guide?")]
 
 def load_training_data():
@@ -93,6 +100,7 @@ def process_data():
 def extract_text(xml):#STUB
     return xml
     
+    
 def num_syllables(tokens):
     syll = 0
     for word in tokens:
@@ -107,15 +115,23 @@ def num_syllables(tokens):
             syll += 0
     return syll
     
-def is_common(word):
+def is_stopword(word):
     if word in stopwords:
         return True
     else:
         return False
         
+def is_common(word):
+    if word in commonwords:
+        return True
+    else:
+        return False
+        
+def stopword_count(tokens):
+    return len([1 for word in tokens if is_stopword(word)])
+
 def common_count(tokens):
     return len([1 for word in tokens if is_common(word)])
-    
     
 def character_count(word_tokens):
     return sum([len(word) for word in word_tokens])
@@ -133,14 +149,14 @@ def paragraph_features(xml):
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
     features["ave word length"] = character_count(word_tokens)/len(word_tokens)
     features["\% common words"] = common_count(word_tokens)
-
+    features["\% stop words"] = stopword_count(word_tokens) 
     return features
 
 #para list ("text text text", rating)
 def paragraph_featuresets(para_list):
     return [(paragraph_features(w), int(s)) for (w, s) in para_list]
 
-
+create_common_list()
 classifier = train()
 print classify()
 print rmse_class()
