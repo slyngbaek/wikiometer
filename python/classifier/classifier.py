@@ -88,14 +88,34 @@ def rmse_class():
     print 'Predicted:', results
 
     return rmse(test_ratings, results)
+ 
+    
+###GET PAGE###
 
+def get_page(url_title):
+   url = 'http://en.wikipedia.org/wiki/' + url_title
 
+   try:
+      req = urllib2.Request(url, headers={'User-Agent' : "Magic Browser"})
+      page = urllib2.urlopen(req).read()
+      
+      return page
+   
+   except Exception, e:
+      return None
 
 ###TRAINING DATA###
 
 #should return a list of tuples containing ("label", "query result")
 def parse_training_dir():#STUB
-    return [("5", "I live in a bank."), ("3", "This is a test string to show how to do things."), ("4", "This strong is also somewhat difficult to read."), ("2", "Why, writing this way, would one consider formal linguistics as a guide?")]
+    
+    results = []
+
+    with open('trainingset.tsv', 'rb') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter='\t')
+        for row in csvreader:
+            results.append(str(int(row[1]) + int(row[2])), (get_page(re.search('wiki/(\S+)', row[0]).group(1))))
+    return results
 
 def load_training_data():
     l = []
@@ -113,21 +133,6 @@ def process_data():
         'para_list': para_list,
         'featuresets': featuresets
     }
-    
-    
-###GET PAGE###
-
-def get_page(url_title):
-   url = 'http://en.wikipedia.org/wiki/' + url_title
-
-   try:
-      req = urllib2.Request(url, headers={'User-Agent' : "Magic Browser"})
-      page = urllib2.urlopen(req).read()
-      
-      return page
-   
-   except Exception, e:
-      return None
 
 ###FEATURES###
 def extract_text(page):
