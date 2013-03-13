@@ -57,7 +57,7 @@ def classify():
 def classify_single(wiki_title, classifier):
     feature_set = paragraph_features(wiki_title)
     if feature_set is None:
-        print "error"
+        sys.stderr.write("error")
     else:
         rating = classifier.classify(feature_set)
         #error check rating
