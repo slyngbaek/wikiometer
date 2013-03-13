@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 import nltk
 from itertools import izip
 import cPickle as pickle
