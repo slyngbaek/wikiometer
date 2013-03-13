@@ -6,7 +6,7 @@ import math
 import string as st
 from nltk.classify.maxent import TypedMaxentFeatureEncoding
 from nltk.corpus import cmudict
-import sys
+import sys, os
 import urllib, urllib2, re
 from BeautifulSoup import BeautifulSoup
 from BeautifulSoup import BeautifulStoneSoup
@@ -14,17 +14,25 @@ from BeautifulSoup import BeautifulStoneSoup
 d = cmudict.dict()
 punctuation = ".,?!\"\':;"
 stopwords = nltk.corpus.stopwords.words("english")
+os_path = os.getcwd()
 
 def create_common_list():
-    common_file = open("./common-english-words.txt", "r")
+    common_file = open(os_path + "/common-english-words.txt", "r")
     common_list = common_file.read().split(",")
     common_file.close()
     return common_list
     
 commonwords = create_common_list()
 
+#215 wpm
 def time_estimation(wiki_title, rating):
-    return "4:33"
+    page = get_page(wiki_title)
+
+    text = extract_text(page)
+    total_sec = len(text)*(10-rating)/107
+    minutes = total_sec/60
+    seconds = total_sec%60
+    return str(minutes) + ":" + str(seconds)
 
 
 
@@ -32,7 +40,7 @@ def time_estimation(wiki_title, rating):
 ###CLASSIFIER###
 def train():
     try:
-        classif = pickle.load(open("./classifier.pickle", "r"))    
+        classif = pickle.load(open(os_path + "/classifier.pickle", "r"))    
     except IOError:
         #Could not load file
         processed = process_data()
@@ -42,7 +50,7 @@ def train():
         classif = nltk.MaxentClassifier.train\
             (processed['featuresets'], encoding=encoding)
             
-        pickle.dump(classif, open("./classifier.pickle","wb"))
+        pickle.dump(classif, open(os_path + "/classifier.pickle","wb"))
     return classif
 
 
