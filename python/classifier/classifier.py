@@ -5,6 +5,7 @@ import math
 import string as st
 from nltk.classify.maxent import TypedMaxentFeatureEncoding
 from nltk.corpus import cmudict
+import sys
 
 
 d = cmudict.dict()
@@ -16,8 +17,14 @@ def create_common_list():
     common_list = common_file.read().split(",")
     common_file.close()
     return common_list
-
+    
 commonwords = create_common_list()
+
+def time_estimation(wiki_title, rating):
+    return "4:33"
+
+
+
 
 ###CLASSIFIER###
 def train():
@@ -43,6 +50,16 @@ def classify():
     
     return classifier.batch_classify(test_fs)
     
+    
+def classify_single(wiki_title, classifier):
+    feature_set = paragraph_features(wiki_title)
+    if feature_set is None:
+        print "error"
+    else:
+        rating = classifier.classify(feature_set)
+        #error check rating
+        print "Rating: " + str(rating)
+        print "Estimated Time to Read: " + time_estimation(wiki_title, rating)
     
     
 ###RMSE#
@@ -137,10 +154,23 @@ def character_count(word_tokens):
     return sum([len(word) for word in word_tokens])
 
 
-def paragraph_features(xml):
+def paragraph_features(wiki_title):
     features = {}
     
-    text = extract_text(xml)
+    text = extract_text(wiki_title)
+    
+    word_tokens = nltk.word_tokenize(text)
+    sent_tokens = nltk.sent_tokenize(text)
+    
+    features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
+    features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
+    features["ave word length"] = character_count(word_tokens)/len(word_tokens)
+    features["\% common words"] = common_count(word_tokens)
+    features["\% stop words"] = stopword_count(word_tokens) 
+    return features
+
+def paragraph_features_text(text):
+    features = {}
     
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
@@ -154,10 +184,19 @@ def paragraph_features(xml):
 
 #para list ("text text text", rating)
 def paragraph_featuresets(para_list):
-    return [(paragraph_features(w), int(s)) for (w, s) in para_list]
+    return [(paragraph_features_text(w), int(s)) for (w, s) in para_list]
+
+
 
 create_common_list()
 classifier = train()
-print classify()
-print rmse_class()
-classifier.show_most_informative_features(10)
+
+#if   - classify call for wikipedia article
+#else - validation call
+if len(sys.argv) > 1:
+    classify_single(sys.argv[1], classifier)
+else:
+    
+    print classify()
+    print rmse_class()
+    classifier.show_most_informative_features(10)
