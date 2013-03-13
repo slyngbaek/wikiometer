@@ -3,18 +3,24 @@ extends layout
 block content
   br
   .container
-    .hero-unit
-      h1 Wikiometer
-      p.lead Wikipedia readability measure that can accurately determine if an article is well written.
-      br
-      br
-      form(id="wiki_link", action="/", method="post").form-inline
-        .input-prepend.input-append
-          span.add-on http://en.wikipedia.org/wiki/
-          input(type="text", name="link", id="link", placeholder="Michael_jordan").input-xxlarge
-          button(type="button").btn.btn-success Submit
-    .span4.text-center
+    .row
+      .span12
         .hero-unit
-            h1 Score:
-            - if (score)
-              h2 #{score}
+          h1 Wikiometer
+          p.lead Wikipedia readability measure that can accurately determine if an article is well written.
+          br
+          br
+          form(id="wiki_link", action="/", method="post").form-inline
+            - if (error)
+              .input-prepend.input-append.control-group.error
+            - else
+              .input-prepend.input-append
+                span.add-on http://en.wikipedia.org/wiki/
+                input(type="text", name="link", id="link inputError", placeholder="Michael_jordan").input-xxlarge
+                button(type="button").btn.btn-success Submit
+
+      #score-card.span4.offset4.text-center
+        .hero-unit
+          h1 Score:
+          - if (score)
+            h2#score #{score}

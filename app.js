@@ -30,20 +30,28 @@ app.configure('development', function(){
 app.get('/', routes.index);
 app.post('/', function(request, response) {
 
-  var wiki_link = request.body.link;
-  console.log(wiki_link);
-  console.log(__dirname);
+  var wiki_link = request.body.link
+    , python_script = __dirname + '/python/classifier/classifier.py';
 
-  test = spawn('python', [__dirname + '/python/test.py']);
+  console.log(wiki_link);
+  console.log(python_script);
+
+  test = spawn(python_script, [wiki_link]);
   test.stdout.on('data', function(data) {
     console.log('Stdout: ' + data);
     response.render('index', {
       title: 'Wikiometer',
-      score: wiki_link
+      score: wiki_link,
+      error: null
     });
   });
   test.stderr.on('data', function(data) {
     console.log('Stderr: ' + data);
+    response.render('index', {
+      title: 'Wikiometer',
+      score: null,
+      error: 'error'
+    });
   });
 });
 

@@ -20,14 +20,16 @@ def hapax_find(text):
    fdist= nltk.probability.FreqDist(word.lower().strip(string.punctuation) for word in text.split())
    return fdist.hapaxes()
 
-def acronym_count(text):
+def avg_acronym_count(text):
    count=0
+   total=0
    sentences=nltk.sent_tokenize(text)
    for sentence in sentences:
       for word in nltk.word_tokenize(sentence):
-         if word.isupper() and len(word)>=3:
+         total+=1
+         if word.isupper() and len(word.strip(string.punctuation))>=3:
             count+=1
-   return count
+   return float(count)/total
 
 #makes arrays of various distributions
 #sort out returns later
@@ -119,6 +121,18 @@ def char_Dist(text):
       nums[i]=nums[i]/float(total)
    for i in range(len(punctuation)):
       punctuation[i]=punctuation[i]/float(total)
+
+def number_freq(text):
+   count=0
+   total=0
+   sentences=nltk.sent_tokenize(text)
+   for sentence in sentences:
+      for word in nltk.word_tokenize(sentence):
+         total+=1
+         if word.strip(string.punctuation).isdigit():
+            count+=1
+   return float(count)/total
+
 
 def unkown_char_freq(text):
    ignore=[' ','.']

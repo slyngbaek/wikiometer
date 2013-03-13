@@ -4,5 +4,5 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Wikiometer', score: null });
+  res.render('index', { title: 'Wikiometer', score: null, error: null });
 };
