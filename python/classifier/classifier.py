@@ -53,10 +53,13 @@ def classify():
     
 def classify_single(wiki_title, classifier):
     feature_set = paragraph_features(wiki_title)
-    rating = classifier.classify(feature_set)
-    #error check rating
-    print "Rating: " + str(rating)
-    print "Estimated Time to Read: " + time_estimation(wiki_title, rating)
+    if feature_set is None:
+        print "error"
+    else:
+        rating = classifier.classify(feature_set)
+        #error check rating
+        print "Rating: " + str(rating)
+        print "Estimated Time to Read: " + time_estimation(wiki_title, rating)
     
     
 ###RMSE#
@@ -166,9 +169,22 @@ def paragraph_features(wiki_title):
     features["\% stop words"] = stopword_count(word_tokens) 
     return features
 
+def paragraph_features_text(text):
+    features = {}
+    
+    word_tokens = nltk.word_tokenize(text)
+    sent_tokens = nltk.sent_tokenize(text)
+    
+    features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
+    features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
+    features["ave word length"] = character_count(word_tokens)/len(word_tokens)
+    features["\% common words"] = common_count(word_tokens)
+    features["\% stop words"] = stopword_count(word_tokens) 
+    return features
+
 #para list ("text text text", rating)
 def paragraph_featuresets(para_list):
-    return [(paragraph_features(w), int(s)) for (w, s) in para_list]
+    return [(paragraph_features_text(w), int(s)) for (w, s) in para_list]
 
 
 
