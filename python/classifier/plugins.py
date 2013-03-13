@@ -5,9 +5,7 @@ import string
 #funtions for isolaing features
 #need to be altered to work with classifier(return values or alter dictionary?)
 
-def avg_Length(text):
-
-   sentences=nltk.sent_tokenize(text)
+def avg_length(sentences):
    
    #p=re.compile('[a-z][A-Z]')
    total=0
@@ -15,20 +13,18 @@ def avg_Length(text):
       total+=len(item)
    return float(total)/len(sentences)
 
-def hapax_find(text):
+def hapax_find(word_tokens):
 
-   fdist= nltk.probability.FreqDist(word.lower().strip(string.punctuation) for word in text.split())
-   return fdist.hapaxes()
+   fdist= nltk.probability.FreqDist(word.lower().strip(string.punctuation) for word in word_tokens)
+   return len(fdist.hapaxes())
 
-def avg_acronym_count(text):
+def avg_acronym_count(word_tokens):
    count=0
    total=0
-   sentences=nltk.sent_tokenize(text)
-   for sentence in sentences:
-      for word in nltk.word_tokenize(sentence):
-         total+=1
-         if word.isupper() and len(word.strip(string.punctuation))>=3:
-            count+=1
+   for word in word_tokens:
+      total+=1
+      if word.isupper() and len(word.strip(string.punctuation))>=3:
+         count+=1
    return float(count)/total
 
 #makes arrays of various distributions

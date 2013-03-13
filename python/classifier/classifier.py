@@ -7,9 +7,11 @@ import string as st
 from nltk.classify.maxent import TypedMaxentFeatureEncoding
 from nltk.corpus import cmudict
 import sys, os
+import csv, string
 import urllib, urllib2, re
 from BeautifulSoup import BeautifulSoup
 from BeautifulSoup import BeautifulStoneSoup
+import plugins
 
 d = cmudict.dict()
 punctuation = ".,?!\"\':;"
@@ -29,10 +31,13 @@ def time_estimation(wiki_title, rating):
     page = get_page(wiki_title)
 
     text = extract_text(page)
-    total_sec = len(text)*(10-rating)/107
+    total_sec = text_len*(10-rating)/107
     minutes = total_sec/60
     seconds = total_sec%60
-    return str(minutes) + ":" + str(seconds)
+    second_string = str(seconds)
+    if seconds < 10:
+        second_string = "0" + str(seconds)
+    return str(minutes) + ":" + second_string
 
 
 
@@ -45,11 +50,11 @@ def train():
         #Could not load file
         processed = process_data()
         
-        encoding = TypedMaxentFeatureEncoding.train\
+        '''encoding = TypedMaxentFeatureEncoding.train\
             (processed['featuresets'], count_cutoff=3, alwayson_features=True)
         classif = nltk.MaxentClassifier.train\
-            (processed['featuresets'], encoding=encoding)
-            
+            (processed['featuresets'], encoding=encoding)'''
+        classif = nltk.MaxentClassifier.train(processed['featuresets'])   
         pickle.dump(classif, open(os_path + "/classifier.pickle","wb"))
     return classif
 
@@ -90,6 +95,7 @@ def rmse_class():
     processed = process_data()
 
     test_fs, test_ratings = zip(*processed['featuresets'])
+    print test_fs[0]
     results = classifier.batch_classify(test_fs)
 
     print 'Actual:', test_ratings
@@ -115,14 +121,15 @@ def get_page(url_title):
 ###TRAINING DATA###
 
 #should return a list of tuples containing ("label", "query result")
-def parse_training_dir():#STUB
+def parse_training_dir():
     
     results = []
 
-    with open('trainingset.tsv', 'rb') as csvfile:
+    with open(os_path + '/trainingset_short.tsv', 'rb') as csvfile:
         csvreader = csv.reader(csvfile, delimiter='\t')
         for row in csvreader:
-            results.append(str(int(row[1]) + int(row[2])), (get_page(re.search('wiki/(\S+)', row[0]).group(1))))
+            print "Processing {0}".format(row[0])
+            results.append((str(int(row[1])), (get_page(re.search('wiki/(\S+)', row[0]).group(1)))))
     return results
 
 def load_training_data():
@@ -200,11 +207,13 @@ def stopword_count(tokens):
     return len([1 for word in tokens if is_stopword(word)])
 
 def common_count(tokens):
-    return len([1 for word in tokens if is_common(word)])
+    return 10
+    #return len([word for word in tokens if is_common(word)])
     
 def character_count(word_tokens):
     return sum([len(word) for word in word_tokens])
 
+def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
 def paragraph_features(wiki_title):
     features = {}
@@ -212,21 +221,36 @@ def paragraph_features(wiki_title):
     page = get_page(wiki_title)
     if not page:
        return None
-
+    
     text = extract_text(page)
+    
+    global text_len
+    text_len = len(text)#used for time_estimation()
+
 
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
+
     
     features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
     features["ave word length"] = character_count(word_tokens)/len(word_tokens)
-    features["\% common words"] = common_count(word_tokens)
-    features["\% stop words"] = stopword_count(word_tokens) 
+    features["acronym count"] = \
+                        plugins.avg_acronym_count(word_tokens)/len(word_tokens)
+    features["percent common words"] = \
+                        common_count(word_tokens)/len(word_tokens)
+    features["percent stop words"] = \
+                        stopword_count(word_tokens)/len(word_tokens)
+    features["hapax legomenon"] = \
+                        plugins.hapax_find(word_tokens)/len(word_tokens)
+    
+    
     return features
 
-def paragraph_features_text(text):
+def paragraph_features_page(page):
     features = {}
+
+    text = extract_text(page)
     
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
@@ -234,13 +258,20 @@ def paragraph_features_text(text):
     features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
     features["ave word length"] = character_count(word_tokens)/len(word_tokens)
-    features["\% common words"] = common_count(word_tokens)
-    features["\% stop words"] = stopword_count(word_tokens) 
+    features["acronym count"] = \
+                        plugins.avg_acronym_count(word_tokens)/len(word_tokens)
+    features["percent common words"] = \
+                        common_count(word_tokens)/len(word_tokens)
+    features["percent stop words"] = \
+                        stopword_count(word_tokens)/len(word_tokens)
+    features["hapax legomenon"] = \
+                        plugins.hapax_find(word_tokens)/len(word_tokens)
+    
     return features
 
 #para list ("text text text", rating)
 def paragraph_featuresets(para_list):
-    return [(paragraph_features_text(w), int(s)) for (w, s) in para_list]
+    return [(paragraph_features_page(w), int(s)) for (w, s) in para_list]
 
 
 
