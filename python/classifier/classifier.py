@@ -6,7 +6,9 @@ import string as st
 from nltk.classify.maxent import TypedMaxentFeatureEncoding
 from nltk.corpus import cmudict
 import sys
-
+import urllib, urllib2, re
+from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import BeautifulStoneSoup
 
 d = cmudict.dict()
 punctuation = ".,?!\"\':;"
@@ -112,10 +114,46 @@ def process_data():
     }
     
     
+###GET PAGE###
+
+def get_page(url_title):
+   url = 'http://en.wikipedia.org/wiki/' + url_title
+
+   try:
+      req = urllib2.Request(url, headers={'User-Agent' : "Magic Browser"})
+      page = urllib2.urlopen(req).read()
+      
+      return page
+   
+   except Exception, e:
+      return None
 
 ###FEATURES###
-def extract_text(xml):#STUB
-    return xml
+def extract_text(page):
+   if not page:
+      return None
+   
+   try:
+      ps = BeautifulSoup(page).findAll('p')
+      ret = ''
+
+      for p in ps:
+         temp = str(p)
+
+         #remove html tags
+         temp = re.sub('\<.*?\>', '', temp)
+
+         #remove citations
+         temp = re.sub('\<.*?\>', '', temp)
+
+         ret += temp
+         ret += '\n'
+
+      return BeautifulStoneSoup(ret, convertEntities="html", smartQuotesTo="html").contents[0]
+   
+   except Exception, e:
+      print e
+      return None
     
     
 def num_syllables(tokens):
@@ -157,8 +195,12 @@ def character_count(word_tokens):
 def paragraph_features(wiki_title):
     features = {}
     
-    text = extract_text(wiki_title)
-    
+    page = get_page(wiki_title)
+    if not page:
+       return None
+
+    text = extract_text(page)
+
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
     
