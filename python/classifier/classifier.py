@@ -29,10 +29,8 @@ def create_common_list():
 commonwords = create_common_list()
 
 #215 wpm
-def time_estimation(wiki_title, rating):
-    page = get_page(wiki_title)
-
-    text = extract_text(page)
+def time_estimation(rating):
+    text_len = len(text_time)
     total_sec = text_len*(10-rating)/107
     minutes = total_sec/60
     seconds = total_sec%60
@@ -77,7 +75,7 @@ def classify_single(wiki_title, classifier):
         rating = classifier.classify(feature_set)
         #error check rating
         print "Rating: " + str(rating)
-        print "Estimated Time to Read: " + time_estimation(wiki_title, rating)
+        print "Estimated Time to Read: " + time_estimation(rating)
         
 def nfold_cross_validate(data, n=4):
     data_chunks = chunks(data, len(data) / n)
@@ -103,9 +101,9 @@ def rmse_class():
     processed = process_data()
 
     test_fs, test_ratings = zip(*processed['featuresets'])
-    print test_fs[0] 
     results = classifier.batch_classify(test_fs)
-
+    print "Expected: " + str(results)
+    print "Actual:   " + str(test_ratings)
     return rmse(test_ratings, results)
 
 def rmse(a, b):
@@ -231,12 +229,10 @@ def paragraph_features(wiki_title):
     page = get_page(wiki_title)
     if not page:
        return None
-    print wiki_title
     text = extract_text(page)
     
-    global text_len
-    text_len = len(text)#used for time_estimation()
-
+    global text_time
+    text_time = text#used for time_estimation()
 
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
