@@ -204,9 +204,10 @@ def is_common(word):
         return False
         
 def stopword_count(tokens):
-    return len([1 for word in tokens if is_stopword(word)])
+    return float(len([1 for word in tokens if is_stopword(word)]))
 
 def common_count(tokens):
+    #should probably change this
     return 10
     #return len([word for word in tokens if is_common(word)])
     
@@ -243,7 +244,9 @@ def paragraph_features(wiki_title):
                         stopword_count(word_tokens)/len(word_tokens)
     features["hapax legomenon"] = \
                         plugins.hapax_find(word_tokens)/len(word_tokens)
-    
+   
+    features["percent numbers"]= \
+                        plugins.number_freq(word_tokens)/len(word_tokens)
     
     return features
 
@@ -266,6 +269,8 @@ def paragraph_features_page(page):
                         stopword_count(word_tokens)/len(word_tokens)
     features["hapax legomenon"] = \
                         plugins.hapax_find(word_tokens)/len(word_tokens)
+    features["percent numbers"]= \
+                        plugins.number_freq(word_tokens)/len(word_tokens)
     
     return features
 

@@ -16,16 +16,14 @@ def avg_length(sentences):
 def hapax_find(word_tokens):
 
    fdist= nltk.probability.FreqDist(word.lower().strip(string.punctuation) for word in word_tokens)
-   return len(fdist.hapaxes())
+   return float(len(fdist.hapaxes()))
 
 def avg_acronym_count(word_tokens):
    count=0
-   total=0
    for word in word_tokens:
-      total+=1
       if word.isupper() and len(word.strip(string.punctuation))>=3:
          count+=1
-   return float(count)/total
+   return float(count)
 
 #makes arrays of various distributions
 #sort out returns later
@@ -118,16 +116,12 @@ def char_Dist(text):
    for i in range(len(punctuation)):
       punctuation[i]=punctuation[i]/float(total)
 
-def number_freq(text):
+def number_freq(words):
    count=0
-   total=0
-   sentences=nltk.sent_tokenize(text)
-   for sentence in sentences:
-      for word in nltk.word_tokenize(sentence):
-         total+=1
-         if word.strip(string.punctuation).isdigit():
-            count+=1
-   return float(count)/total
+   for word in words:
+      if word.strip(string.punctuation).isdigit():
+         count+=1
+   return float(count)
 
 
 def unkown_char_freq(text):
