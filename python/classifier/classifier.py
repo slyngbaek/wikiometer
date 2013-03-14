@@ -241,18 +241,17 @@ def paragraph_features(wiki_title):
     features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
     features["ave word length"] = character_count(word_tokens)/len(word_tokens)
-    features["acronym count"] = \
-                        plugins.avg_acronym_count(word_tokens)/len(word_tokens)
     features["percent common words"] = \
                         common_count(word_tokens)/len(word_tokens)
     features["percent stop words"] = \
                         stopword_count(word_tokens)/len(word_tokens)
     features["hapax legomenon"] = \
                         plugins.hapax_find(word_tokens)/len(word_tokens)
-   
+    features["acronym count"] = \
+                        plugins.avg_acronym_count(word_tokens)/len(word_tokens)
     features["percent numbers"]= \
                         plugins.number_freq(word_tokens)/len(word_tokens)
-    
+                        
     return features
 
 def paragraph_features_page(page):
@@ -265,14 +264,14 @@ def paragraph_features_page(page):
     features["ave syllables/word"] = num_syllables(word_tokens)/len(word_tokens)
     features["ave sentence length"] = len(word_tokens)/len(sent_tokens)
     features["ave word length"] = character_count(word_tokens)/len(word_tokens)
-    features["acronym count"] = \
-                        plugins.avg_acronym_count(word_tokens)/len(word_tokens)
     features["percent common words"] = \
                         common_count(word_tokens)/len(word_tokens)
     features["percent stop words"] = \
                         stopword_count(word_tokens)/len(word_tokens)
     features["hapax legomenon"] = \
                         plugins.hapax_find(word_tokens)/len(word_tokens)
+    features["acronym count"] = \
+                        plugins.avg_acronym_count(word_tokens)/len(word_tokens)
     features["percent numbers"]= \
                         plugins.number_freq(word_tokens)/len(word_tokens)
     
