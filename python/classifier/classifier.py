@@ -18,7 +18,7 @@ from util import chunks, flatten
 d = cmudict.dict()
 punctuation = ".,?!\"\':;"
 stopwords = nltk.corpus.stopwords.words("english")
-os_path = os.getcwd()
+os_path = os.getcwd() + '/python/classifier'
 
 def create_common_list():
     common_file = open(os_path + "/common-english-words.txt", "r")
@@ -74,8 +74,8 @@ def classify_single(wiki_title, classifier):
     else:
         rating = classifier.classify(feature_set)
         #error check rating
-        print "Rating: " + str(rating)
-        print "Estimated Time to Read: " + time_estimation(rating)
+        print str(rating)
+        print time_estimation(rating)
         
 def nfold_cross_validate(data, n=4):
     data_chunks = chunks(data, len(data) / n)

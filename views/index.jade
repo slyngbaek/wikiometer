@@ -13,14 +13,19 @@ block content
           form(id="wiki_link", action="/", method="post").form-inline
             - if (error)
               .input-prepend.input-append.control-group.error
+                span.add-on http://en.wikipedia.org/wiki/
+                input(type="text", name="link", id="link inputError", placeholder="Enter Valid Wikipedia Page").input-xxlarge
+                button(type="submit").btn.btn-success Submit
             - else
               .input-prepend.input-append
                 span.add-on http://en.wikipedia.org/wiki/
-                input(type="text", name="link", id="link inputError", placeholder="Michael_jordan").input-xxlarge
-                button(type="button").btn.btn-success Submit
-
-      #score-card.span4.offset4.text-center
+                input(type="text", name="link", id="link inputError", placeholder="Sedation").input-xxlarge
+                button(type="submit").btn.btn-success Submit
+      #score-card.span6.offset3.text-center
         .hero-unit
-          h1 Score:
           - if (score)
-            h2#score #{score}
+            #score
+              p.lead Rating
+              h1 #{score[0]}
+              p.lead Estimated Time To Read
+              h1 #{score[1]}

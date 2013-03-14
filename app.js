@@ -36,16 +36,19 @@ app.post('/', function(request, response) {
   console.log(wiki_link);
   console.log(python_script);
 
-  test = spawn(python_script, [wiki_link]);
-  test.stdout.on('data', function(data) {
+  python = spawn(python_script, [wiki_link]);
+
+  python.stdout.on('data', function(data) {;
+    score = data.toString().split("\n");
     console.log('Stdout: ' + data);
     response.render('index', {
       title: 'Wikiometer',
-      score: wiki_link,
+      score: score,
       error: null
     });
   });
-  test.stderr.on('data', function(data) {
+
+  python.stderr.on('data', function(data) {
     console.log('Stderr: ' + data);
     response.render('index', {
       title: 'Wikiometer',
