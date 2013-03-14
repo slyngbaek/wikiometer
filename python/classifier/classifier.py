@@ -12,6 +12,8 @@ import urllib, urllib2, re
 from BeautifulSoup import BeautifulSoup
 from BeautifulSoup import BeautifulStoneSoup
 import plugins
+from util import chunks, flatten
+
 
 d = cmudict.dict()
 punctuation = ".,?!\"\':;"
@@ -76,32 +78,41 @@ def classify_single(wiki_title, classifier):
         #error check rating
         print "Rating: " + str(rating)
         print "Estimated Time to Read: " + time_estimation(wiki_title, rating)
+        
+def nfold_cross_validate(data, n=4):
+    data_chunks = chunks(data, len(data) / n)
+
+    rmse_values = []
+    for i in range(n):
+        train_set = flatten(data_chunks[:i] + data_chunks[i + 1:])
+        test_set = data_chunks[i]
+        classif = nltk.MaxentClassifier.train(train_set)   
+        
+        test_fs, test_ratings = zip(*test_set)
+        results = classif.batch_classify(test_fs)
+        set_rmse = rmse(test_ratings, results)
+        print 'RMSE: ', set_rmse
+
+        rmse_values.append(set_rmse)
+    
+    print 'Average RMSE:', sum(rmse_values) / float(len(rmse_values))
     
     
 ###RMSE#
+def rmse_class():
+    processed = process_data()
+
+    test_fs, test_ratings = zip(*processed['featuresets'])
+    print test_fs[0] 
+    results = classifier.batch_classify(test_fs)
+
+    return rmse(test_ratings, results)
+
 def rmse(a, b):
     if len(a) != len(b):
         raise ValueError('a and b must have same length')
 
     return math.sqrt(float(sum((x - y) ** 2 for x, y in izip(a, b))) / len(a))
-
-def rmse_equal(a, b):
-    if len(a) != len(b):
-        raise ValueError('a and b must have same length')
-
-    return math.sqrt(float(sum(0 if x == y else 1 for x, y in izip(a, b))) / len(a))
-    
-def rmse_class():
-    processed = process_data()
-
-    test_fs, test_ratings = zip(*processed['featuresets'])
-    print test_fs[0]
-    results = classifier.batch_classify(test_fs)
-
-    print 'Actual:', test_ratings
-    print 'Predicted:', results
-
-    return rmse(test_ratings, results)
  
     
 ###GET PAGE###
@@ -207,9 +218,7 @@ def stopword_count(tokens):
     return float(len([1 for word in tokens if is_stopword(word)]))
 
 def common_count(tokens):
-    #should probably change this
-    return 10
-    #return len([word for word in tokens if is_common(word)])
+    return float(len([word for word in tokens if is_common(word)]))
     
 def character_count(word_tokens):
     return sum([len(word) for word in word_tokens])
@@ -222,7 +231,7 @@ def paragraph_features(wiki_title):
     page = get_page(wiki_title)
     if not page:
        return None
-    
+    print wiki_title
     text = extract_text(page)
     
     global text_len
@@ -254,7 +263,6 @@ def paragraph_features_page(page):
     features = {}
 
     text = extract_text(page)
-    
     word_tokens = nltk.word_tokenize(text)
     sent_tokens = nltk.sent_tokenize(text)
     
@@ -286,9 +294,10 @@ classifier = train()
 #if   - classify call for wikipedia article
 #else - validation call
 if len(sys.argv) > 1:
-    classify_single(sys.argv[1], classifier)
+    if sys.argv[1] == "-v":
+        nfold_cross_validate(process_data()['featuresets'], n=4)
+    else:
+        classify_single(sys.argv[1], classifier)
 else:
-    
-    print classify()
     print rmse_class()
     classifier.show_most_informative_features(10)
